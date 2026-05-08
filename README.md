@@ -28,7 +28,19 @@ API disponível em `http://localhost:8001`.
 
 - `GET /health`
 - `POST /collect` (dispara coleta da fonte G1 Tecnologia)
-- `GET /news?limit=50&offset=0`
+- `GET /news?limit=20&offset=0`
+
+Exemplo de resposta de paginação:
+
+```json
+{
+  "items": [],
+  "limit": 20,
+  "offset": 0,
+  "total": 120,
+  "has_next": true
+}
+```
 
 ## Estrutura
 
@@ -49,3 +61,4 @@ app/
 - **FastAPI**: integração natural com ecossistema async e tipagem clara.
 - **Deduplicação por URL**: evita reprocessamento e registros repetidos no banco.
 - **Scraper isolado por fonte**: facilita manutenção quando o HTML de uma fonte muda.
+- **Retry e logging básicos**: melhora resiliência e debugging sem aumentar complexidade.

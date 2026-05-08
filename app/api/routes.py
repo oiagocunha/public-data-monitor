@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import SessionLocal
-from app.schemas.news import NewsRead
-from app.services import collect_news, list_news
+from app.schemas.news import NewsPage, NewsRead
+from app.services import collect_news, count_news, list_news
 
 router = APIRouter()
 
@@ -24,11 +24,18 @@ async def collect(session: AsyncSession = Depends(get_session)) -> dict[str, int
     return {"inserted": inserted}
 
 
-@router.get("/news", response_model=list[NewsRead])
+@router.get("/news", response_model=NewsPage)
 async def get_news(
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
     session: AsyncSession = Depends(get_session),
-) -> list[NewsRead]:
+) -> NewsPage:
     news = await list_news(session=session, limit=limit, offset=offset)
-    return list(news)
+    total = await count_news(session=session)
+    return NewsPage(
+        items=[NewsRead.model_validate(item) for item in news],
+        limit=limit,
+        offset=offset,
+        total=total,
+        has_next=(offset + limit) < total,
+    )

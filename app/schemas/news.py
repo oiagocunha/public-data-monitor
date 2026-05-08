@@ -12,3 +12,11 @@ class NewsRead(BaseModel):
     url: str
     source: str
     published_at: datetime | None
+
+
+class NewsPage(BaseModel):
+    items: list[NewsRead]
+    limit: int
+    offset: int
+    total: int
+    has_next: bool

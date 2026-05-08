@@ -1,16 +1,34 @@
 from datetime import datetime
 from email.utils import parsedate_to_datetime
+import asyncio
+import logging
 
 import httpx
 from bs4 import BeautifulSoup
 
+logger = logging.getLogger(__name__)
+
 
 async def scrape_g1_tech(limit: int = 20) -> list[dict]:
     url = "https://g1.globo.com/tecnologia/"
+    retries = 3
 
-    async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
-        response = await client.get(url)
-        response.raise_for_status()
+    response: httpx.Response | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            async with httpx.AsyncClient(timeout=20.0, follow_redirects=True) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+            break
+        except (httpx.HTTPError, httpx.TimeoutException) as exc:
+            logger.warning("Scraping G1 falhou na tentativa %s/%s: %s", attempt, retries, exc)
+            if attempt == retries:
+                logger.error("Scraping G1 falhou apos %s tentativas", retries)
+                return []
+            await asyncio.sleep(0.5 * attempt)
+
+    if response is None:
+        return []
 
     soup = BeautifulSoup(response.text, "html.parser")
     cards = soup.select("a.feed-post-link")
