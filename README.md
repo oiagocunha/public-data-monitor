@@ -1,36 +1,98 @@
 # Public Data Monitor
 
-Projeto backend focado em coleta assíncrona de dados públicos com persistência em PostgreSQL e API em FastAPI.
+Backend para coleta e consulta de notícias públicas com FastAPI, PostgreSQL e processamento assíncrono.
 
 ## Objetivo
 
-Construir um MVP de coleta e recuperação de notícias públicas para demonstrar competências de backend:
-Python, asyncio, FastAPI, SQL async, Docker e organização de código.
+Construir um MVP de ingestão e consulta de notícias para demonstrar competências de backend:
+Python, asyncio, FastAPI, SQL assíncrono, Docker e organização em camadas.
 
-## Stack
+## Requisitos
 
-- Python 3.11
-- FastAPI
-- SQLAlchemy Async + asyncpg
-- PostgreSQL
-- httpx + BeautifulSoup4
-- Docker Compose
+Antes de rodar o projeto, você precisa de:
 
-## Como rodar
+- [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
+
+## Configuração
+
+1. Clone o repositório:
 
 ```bash
-docker compose up --build
+git clone <url-do-seu-repositorio>
+cd public-data-monitor
 ```
 
-API disponível em `http://localhost:8001`.
+2. (Opcional) copie o arquivo de ambiente de exemplo:
+
+```bash
+cp .env.example .env
+# No Windows (PowerShell): Copy-Item .env.example .env
+```
+
+## Uso
+
+1. Suba os containers sem travar o terminal:
+
+```bash
+docker compose up -d --build
+```
+
+2. Acesse:
+
+- API: `http://localhost:8001`
+- Swagger (OpenAPI): `http://localhost:8001/docs`
+
+3. Dispare a coleta inicial de notícias:
+
+```bash
+curl -X POST http://localhost:8001/news
+```
+
+4. Consulte as notícias coletadas:
+
+```bash
+curl "http://localhost:8001/news?limit=20&offset=0"
+```
+
+## Demonstração (Swagger)
+
+### 1) Tela inicial da documentação
+
+Visão geral dos endpoints disponíveis e organização da API.
+
+![Tela inicial do Swagger](./docs/images/swagger-home.png)
+
+### 2) Coleta de notícias (`POST /news`)
+
+Execução da coleta com retorno da quantidade de itens inseridos.
+
+![Endpoint POST /news](./docs/images/swagger-post-news.png)
+
+### 3) Listagem de notícias (`GET /news`)
+
+Consulta paginada com `limit` e `offset`, retornando `items`, `total` e `has_next`.
+
+Parameters:  
+![Endpoint GET /news](./docs/images/swagger-get-news_parameters.png)
+
+Responses:  
+![Endpoint GET /news](./docs/images/swagger-get-news_responses.png)
+
+### 4) Schemas da API
+
+Visualização dos contratos de resposta da aplicação (`HealthResponse`, `CollectNewsResponse`, `NewsRead` e `NewsPage`).
+
+![Schemas da API](./docs/images/swagger-schemas.png)
 
 ## Endpoints
 
-- `GET /health`
-- `POST /collect` (dispara coleta da fonte G1 Tecnologia)
-- `GET /news?limit=20&offset=0`
+- `GET /health` - health check da aplicação
+- `POST /news` - executa a coleta e persiste notícias novas
+- `GET /news?limit=20&offset=0` - lista notícias com paginação
+- `GET /docs` - documentação interativa da API
 
-Exemplo de resposta de paginação:
+Exemplo de resposta paginada:
 
 ```json
 {
@@ -41,6 +103,14 @@ Exemplo de resposta de paginação:
   "has_next": true
 }
 ```
+
+## Convenção RESTful adotada
+
+Para manter consistência com RESTful naming convention:
+
+- usar substantivos no plural para recursos (`/news`);
+- usar o método HTTP para representar a ação (`POST /news` cria/coleta, `GET /news` consulta);
+- evitar verbos na URL (por isso `POST /collect` foi substituído por `POST /news`).
 
 ## Estrutura
 
