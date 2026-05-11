@@ -13,7 +13,8 @@ services:
   api:
     build: .
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/public_data
+      # Opcional: sobrescreva via .env (veja .env.example)
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@db:5432/public_data}
     ports:
       - "8001:8000"
     depends_on:

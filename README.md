@@ -4,8 +4,16 @@ Backend para coleta e consulta de notícias públicas com FastAPI, PostgreSQL e 
 
 ## Objetivo
 
-Construir um MVP de ingestão e consulta de notícias para demonstrar competências de backend:
-Python, asyncio, FastAPI, SQL assíncrono, Docker e organização em camadas.
+Construir um MVP de coleta e consulta de notícias para demonstrar competências de backend.
+
+## Tecnologias utilizadas
+
+- Python
+- asyncio
+- FastAPI
+- SQL assíncrono
+- Docker
+- Organização em camadas
 
 ## Requisitos
 
@@ -29,6 +37,9 @@ cd public-data-monitor
 cp .env.example .env
 # No Windows (PowerShell): Copy-Item .env.example .env
 ```
+
+> O projeto funciona sem arquivo `.env` ao subir via Docker Compose, pois as variáveis
+> necessárias já estão definidas no `docker-compose.yml` (incluindo a conexão com o banco).
 
 ## Uso
 
@@ -55,7 +66,7 @@ curl -X POST http://localhost:8001/news
 curl "http://localhost:8001/news?limit=20&offset=0"
 ```
 
-## Demonstração (Swagger)
+## Demonstração (Documentação)
 
 ### 1) Tela inicial da documentação
 
@@ -132,3 +143,7 @@ app/
 - **Deduplicação por URL**: evita reprocessamento e registros repetidos no banco.
 - **Scraper isolado por fonte**: facilita manutenção quando o HTML de uma fonte muda.
 - **Retry e logging básicos**: melhora resiliência e debugging sem aumentar complexidade.
+
+## Licença
+
+Este projeto está licenciado sob a [MIT License](./LICENSE).
