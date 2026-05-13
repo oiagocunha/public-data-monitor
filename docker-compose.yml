@@ -15,6 +15,7 @@ services:
     environment:
       # Opcional: sobrescreva via .env (veja .env.example)
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://postgres:postgres@db:5432/public_data}
+      NEWS_DELETE_API_KEY: ${NEWS_DELETE_API_KEY:-}
     ports:
       - "8001:8000"
     depends_on:

@@ -1,9 +1,16 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import require_delete_news_api_key
 from app.db.session import SessionLocal
 from app.schemas.news import CollectNewsResponse, HealthResponse, NewsPage, NewsRead
-from app.services import collect_news, count_news, list_news
+from app.services import (
+    collect_news,
+    count_news,
+    delete_news_by_id,
+    get_news_by_id,
+    list_news,
+)
 
 router = APIRouter(tags=["News"])
 
@@ -74,3 +81,56 @@ async def get_news(
         total=total,
         has_next=(offset + limit) < total,
     )
+
+
+@router.get(
+    "/news/{news_id}",
+    response_model=NewsRead,
+    summary="Obter noticia por id",
+    description="Retorna uma unica noticia pelo identificador numerico persistido no banco.",
+    response_description="Dados completos da noticia.",
+)
+async def get_news_by_id_route(
+    news_id: int = Path(
+        ...,
+        ge=1,
+        description="Identificador da noticia no banco de dados.",
+        examples=[1],
+    ),
+    session: AsyncSession = Depends(get_session),
+) -> NewsRead:
+    item = await get_news_by_id(session=session, news_id=news_id)
+    if item is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Noticia nao encontrada.",
+        )
+    return NewsRead.model_validate(item)
+
+
+@router.delete(
+    "/news/{news_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remover noticia por id",
+    description=(
+        "Remove uma noticia pelo id. Exige header X-API-Key igual a NEWS_DELETE_API_KEY "
+        "no servidor; se a variavel nao estiver definida, o endpoint responde 403."
+    ),
+    dependencies=[Depends(require_delete_news_api_key)],
+)
+async def delete_news_route(
+    news_id: int = Path(
+        ...,
+        ge=1,
+        description="Identificador da noticia a remover.",
+        examples=[1],
+    ),
+    session: AsyncSession = Depends(get_session),
+) -> Response:
+    deleted = await delete_news_by_id(session=session, news_id=news_id)
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Noticia nao encontrada.",
+        )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

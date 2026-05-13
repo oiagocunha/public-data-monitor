@@ -27,7 +27,11 @@ class NewsRead(BaseModel):
     url: str = Field(description="URL canonica da noticia na fonte original.")
     source: str = Field(description="Nome da fonte de origem da noticia.", examples=["g1"])
     published_at: datetime | None = Field(
-        description="Data e hora de publicacao na fonte. Pode ser nulo quando indisponivel.",
+        description=(
+            "Data e hora de publicacao informada pela fonte original, quando extraida do HTML. "
+            "Pode ser nulo quando a origem nao expoe o dado de forma estruturada ou consistente "
+            "no markup — nesse caso o registro e mantido com titulo e URL validos."
+        ),
     )
 
 
