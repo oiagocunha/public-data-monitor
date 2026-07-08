@@ -88,6 +88,14 @@ curl -X POST http://localhost:8001/news
 curl "http://localhost:8001/news?limit=20&offset=0"
 ```
 
+## Deploy (Render)
+
+Para rodar no Render com PostgreSQL gerenciado:
+
+- defina `DATABASE_URL` com a connection string do banco;
+- se a URL nao vier com `ssl`/`sslmode`, habilite `DB_SSL_REQUIRE=true`;
+- o container ja sobe com porta dinamica via `PORT` (fallback `8000`).
+
 ## Arquitetura (visão rápida)
 
 ```text
